@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Conexión a MinIO</title>
+</head>
+<body>
+  <h1>Conexión a MinIO</h1>
+  <form id="minioForm">
+    <label for="endpoint">Endpoint:</label><br>
+    <input type="text" id="endpoint" name="endpoint" placeholder="http://localhost:9000"><br><br>
+
+    <label for="accessKey">Access Key:</label><br>
+    <input type="text" id="accessKey" name="accessKey"><br><br>
+
+    <label for="secretKey">Secret Key:</label><br>
+    <input type="password" id="secretKey" name="secretKey"><br><br>
+
+    <button type="submit">Conectar</button>
+  </form>
+
+  <div id="resultado"></div>
+
+  <script>
+    const form = document.getElementById('minioForm');
+    const resultado = document.getElementById('resultado');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const data = {
+        endpoint: document.getElementById('endpoint').value,
+        accessKey: document.getElementById('accessKey').value,
+        secretKey: document.getElementById('secretKey').value,
+      };
+
+      try {
+        const response = await fetch('/connect', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(data),
+        });
+
+        const result = await response.json();
+
+        if (result.status === 'success') {
+          resultado.innerHTML = `<p style="color: green;">✅ Conectado exitosamente.</p>
+                                 <p>Buckets disponibles:</p>
+                                 <ul>${result.buckets.map(b => `<li>${b}</li>`).join('')}</ul>`;
+        } else {
+          resultado.innerHTML = `<p style="color: red;">❌ Error: ${result.message}</p>`;
+        }
+      } catch (err) {
+        resultado.innerHTML = `<p style="color: red;">❌ Error de conexión.</p>`;
+      }
+    });
+  </script>
+</body>
+</html>
